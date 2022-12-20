@@ -9,7 +9,7 @@ using Scellecs.Morpeh;
 using Scellecs.Morpeh.Systems;
 
 [Serializable]
-public struct DamageRequestedEvent : IEventData {
+public struct DamageRequest : IEventData {
     public EntityId targetEntityId;
 }
 
@@ -19,20 +19,20 @@ public struct DamagedEvent : IEventData {
 }
 
 public class DamageSystem : UpdateSystem {
-    private Event<DamageRequestedEvent> damageRequestedEvent;
+    private Event<DamageRequest> damageRequest;
     private Event<DamagedEvent> damagedEvent;
 
     public override void OnAwake() {
-        damageRequestedEvent = World.GetEvent<DamageRequestedEvent>();
+        damageRequest = World.GetEvent<DamageRequest>();
         damagedEvent = World.GetEvent<DamagedEvent>();
     }
 
     public override void OnUpdate(float deltaTime) {
-        if (!damageRequestedEvent.IsPublished) {
+        if (!damageRequest.IsPublished) {
             return;
         }
 
-        foreach (var evt in damageRequestedEvent.BatchedChanges) {
+        foreach (var evt in damageRequest.BatchedChanges) {
             ApplyDamage(evt.targetEntityId);
 
             damagedEvent.NextFrame(new DamagedEvent {
