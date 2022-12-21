@@ -7,6 +7,13 @@ namespace Scellecs.Morpeh
     {
         private static readonly IntHashMap<EventRegistry> Registries = new IntHashMap<EventRegistry>();
 
+        internal static void CleanupEventRegistry(World world)
+        {
+            var worldIdentifier = world.identifier;
+
+            Registries.Remove(worldIdentifier, out _);
+        }
+
         [PublicAPI]
         public static Event<TData> GetEvent<TData>(this World world)
             where TData : struct, IEventData
