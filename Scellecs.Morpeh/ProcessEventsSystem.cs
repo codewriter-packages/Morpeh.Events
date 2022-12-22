@@ -1,7 +1,11 @@
 using Scellecs.Morpeh.Collections;
+using Unity.IL2CPP.CompilerServices;
 
 namespace Scellecs.Morpeh
 {
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     internal sealed class ProcessEventsSystem : ICleanupSystem
     {
         private readonly EventRegistry _registry;
