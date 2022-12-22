@@ -7,30 +7,28 @@ namespace Scellecs.Morpeh
     {
         private static readonly IntHashMap<EventRegistry> Registries = new IntHashMap<EventRegistry>();
 
+        internal static void SetupEventRegistry(World world)
+        {
+            var registry = new EventRegistry();
+
+            var eventSystemGroup = world.CreateSystemsGroup();
+            eventSystemGroup.AddSystem(new ProcessEventsSystem(registry));
+            world.AddPluginSystemsGroup(eventSystemGroup);
+
+            Registries.Add(world.identifier, registry, out _);
+        }
+
         internal static void CleanupEventRegistry(World world)
         {
-            var worldIdentifier = world.identifier;
-
-            Registries.Remove(worldIdentifier, out _);
+            Registries.Remove(world.identifier, out _);
         }
 
         [PublicAPI]
         public static Event<TData> GetEvent<TData>(this World world)
             where TData : struct, IEventData
         {
-            var worldIdentifier = world.identifier;
             var eventIdentifier = EventIdentifier<TData>.identifier;
-
-            if (!Registries.TryGetValue(worldIdentifier, out var registry))
-            {
-                registry = new EventRegistry();
-
-                var eventSystemGroup = world.CreateSystemsGroup();
-                eventSystemGroup.AddSystem(new ProcessEventsSystem(registry));
-                world.AddSystemsGroup(9999, eventSystemGroup);
-
-                Registries.Add(worldIdentifier, registry, out _);
-            }
+            var registry = Registries.GetValueByKey(world.identifier);
 
             if (!registry.RegisteredEvents.TryGetValue(eventIdentifier, out var registeredEvent))
             {

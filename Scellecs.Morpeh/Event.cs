@@ -1,9 +1,19 @@
+#if !MORPEH_DEBUG
+#define MORPEH_DEBUG_DISABLED
+#endif
+
 using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using Scellecs.Morpeh.Collections;
+using Unity.IL2CPP.CompilerServices;
 
 namespace Scellecs.Morpeh
 {
+    [Il2CppSetOption(Option.NullChecks, false)]
+    [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
+    [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public class Event<TData> : IEventInternal where TData : struct, IEventData
     {
         private readonly EventRegistry _registry;
@@ -59,11 +69,15 @@ namespace Scellecs.Morpeh
             }
         }
 
-        public void OnFrameEnd()
+        void IEventInternal.OnFrameEnd()
         {
             if (IsPublished)
             {
-                Callback?.Invoke(BatchedChanges);
+                if (Callback != null)
+                {
+                    TryCatchInvokeCallback();
+                    ForwardInvokeCallback();
+                }
 
                 IsPublished = false;
                 BatchedChanges.Clear();
@@ -77,6 +91,28 @@ namespace Scellecs.Morpeh
                 ScheduledChanges.Clear();
 
                 _registry.DispatchedEvents.Add(this);
+            }
+        }
+
+        [Conditional("MORPEH_DEBUG_DISABLED")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void ForwardInvokeCallback()
+        {
+            Callback?.Invoke(BatchedChanges);
+        }
+
+        [Conditional("MORPEH_DEBUG")]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void TryCatchInvokeCallback()
+        {
+            try
+            {
+                Callback?.Invoke(BatchedChanges);
+            }
+            catch (Exception ex)
+            {
+                MLogger.LogError($"Can not invoke callback Event<{typeof(TData)}>");
+                MLogger.LogException(ex);
             }
         }
     }
