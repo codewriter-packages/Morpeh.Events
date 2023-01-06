@@ -14,10 +14,8 @@ namespace Scellecs.Morpeh
     [Il2CppSetOption(Option.NullChecks, false)]
     [Il2CppSetOption(Option.ArrayBoundsChecks, false)]
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
-    public class Event<TData> : IEventInternal where TData : struct, IEventData
+    public class Event<TData> : EventBase where TData : struct, IEventData
     {
-        private readonly EventRegistry _registry;
-
         [PublicAPI] public FastList<TData> BatchedChanges { get; } = new FastList<TData>();
         [PublicAPI] public FastList<TData> ScheduledChanges { get; } = new FastList<TData>();
 
@@ -26,11 +24,6 @@ namespace Scellecs.Morpeh
 
         internal event Action<FastList<TData>> Callback;
 
-        internal Event(EventRegistry registry)
-        {
-            _registry = registry;
-        }
-
         [PublicAPI]
         public void NextFrame(TData data)
         {
@@ -38,7 +31,7 @@ namespace Scellecs.Morpeh
 
             if (!IsPublished && !IsScheduled)
             {
-                _registry.DispatchedEvents.Add(this);
+                registry.DispatchedEvents.Add(this);
             }
 
             IsScheduled = true;
@@ -69,7 +62,7 @@ namespace Scellecs.Morpeh
             }
         }
 
-        void IEventInternal.OnFrameEnd()
+        internal sealed override void OnFrameEnd()
         {
             if (IsPublished)
             {
@@ -90,7 +83,7 @@ namespace Scellecs.Morpeh
                 BatchedChanges.AddListRange(ScheduledChanges);
                 ScheduledChanges.Clear();
 
-                _registry.DispatchedEvents.Add(this);
+                registry.DispatchedEvents.Add(this);
             }
         }
 
@@ -117,8 +110,10 @@ namespace Scellecs.Morpeh
         }
     }
 
-    public interface IEventInternal
+    public abstract class EventBase
     {
-        void OnFrameEnd();
+        internal EventRegistry registry;
+
+        internal abstract void OnFrameEnd();
     }
 }

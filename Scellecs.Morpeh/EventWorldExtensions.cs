@@ -1,3 +1,4 @@
+using System;
 using JetBrains.Annotations;
 using Scellecs.Morpeh.Collections;
 
@@ -27,17 +28,39 @@ namespace Scellecs.Morpeh
         public static Event<TData> GetEvent<TData>(this World world)
             where TData : struct, IEventData
         {
-            var eventIdentifier = EventIdentifier<TData>.identifier;
+            var type = typeof(TData);
             var registry = Registries.GetValueByKey(world.identifier);
 
-            if (!registry.RegisteredEvents.TryGetValue(eventIdentifier, out var registeredEvent))
+            if (registry.RegisteredEvents.TryGetValue(type, out var registeredEvent))
             {
-                registeredEvent = new Event<TData>(registry);
-
-                registry.RegisteredEvents.Add(eventIdentifier, registeredEvent, out _);
+                return (Event<TData>) registeredEvent;
             }
 
+            registeredEvent = new Event<TData>();
+            registeredEvent.registry = registry;
+
+            registry.RegisteredEvents.Add(type, registeredEvent);
+
             return (Event<TData>) registeredEvent;
+        }
+
+        [PublicAPI]
+        public static EventBase GetReflectionEvent(this World world, Type type)
+        {
+            var registry = Registries.GetValueByKey(world.identifier);
+
+            if (registry.RegisteredEvents.TryGetValue(type, out var registeredEvent))
+            {
+                return registeredEvent;
+            }
+
+            var constructedType = typeof(Event<>).MakeGenericType(type);
+            registeredEvent = (EventBase) Activator.CreateInstance(constructedType, true);
+            registeredEvent.registry = registry;
+
+            registry.RegisteredEvents.Add(type, registeredEvent);
+
+            return registeredEvent;
         }
     }
 }
