@@ -23,7 +23,6 @@ namespace Scellecs.Morpeh
 
         public void Dispose()
         {
-            EventWorldExtensions.CleanupEventRegistry(World);
         }
 
         public void OnUpdate(float deltaTime)
