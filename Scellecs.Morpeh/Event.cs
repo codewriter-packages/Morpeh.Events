@@ -16,25 +16,51 @@ namespace Scellecs.Morpeh
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public class Event<TData> : EventBase where TData : struct, IEventData
     {
-        [PublicAPI] public FastList<TData> BatchedChanges { get; } = new FastList<TData>();
-        [PublicAPI] public FastList<TData> ScheduledChanges { get; } = new FastList<TData>();
+        public readonly FastList<TData> batchedChanges = new FastList<TData>();
+        public readonly FastList<TData> scheduledChanges = new FastList<TData>();
 
-        [PublicAPI] public bool IsPublished { get; private set; }
-        [PublicAPI] public bool IsScheduled { get; private set; }
+        public bool isPublished;
+        public bool isScheduled;
+
+#if !MORPEH_STRICT_MODE
+#if MORPEH_LEGACY
+        [Obsolete("[MORPEH] Use batchedChanges instead.")]
+#endif
+        [PublicAPI]
+        public FastList<TData> BatchedChanges => batchedChanges;
+
+#if MORPEH_LEGACY
+        [Obsolete("[MORPEH] Use scheduledChanges instead.")]
+#endif
+        [PublicAPI]
+        public FastList<TData> ScheduledChanges => scheduledChanges;
+
+#if MORPEH_LEGACY
+        [Obsolete("[MORPEH] Use isPublished instead.")]
+#endif
+        [PublicAPI]
+        public bool IsPublished => isPublished;
+
+#if MORPEH_LEGACY
+        [Obsolete("[MORPEH] Use isScheduled instead.")]
+#endif
+        [PublicAPI]
+        public bool IsScheduled => isScheduled;
+#endif
 
         internal event Action<FastList<TData>> Callback;
 
         [PublicAPI]
         public void NextFrame(TData data)
         {
-            ScheduledChanges.Add(data);
+            scheduledChanges.Add(data);
 
-            if (!IsPublished && !IsScheduled)
+            if (!isPublished && !isScheduled)
             {
                 registry.DispatchedEvents.Add(this);
             }
 
-            IsScheduled = true;
+            isScheduled = true;
         }
 
         [PublicAPI]
@@ -64,7 +90,7 @@ namespace Scellecs.Morpeh
 
         internal sealed override void OnFrameEnd()
         {
-            if (IsPublished)
+            if (isPublished)
             {
                 if (Callback != null)
                 {
@@ -72,16 +98,16 @@ namespace Scellecs.Morpeh
                     ForwardInvokeCallback();
                 }
 
-                IsPublished = false;
-                BatchedChanges.Clear();
+                isPublished = false;
+                batchedChanges.Clear();
             }
 
-            if (IsScheduled)
+            if (isScheduled)
             {
-                IsPublished = true;
-                IsScheduled = false;
-                BatchedChanges.AddListRange(ScheduledChanges);
-                ScheduledChanges.Clear();
+                isPublished = true;
+                isScheduled = false;
+                batchedChanges.AddListRange(scheduledChanges);
+                scheduledChanges.Clear();
 
                 registry.DispatchedEvents.Add(this);
             }
@@ -91,7 +117,7 @@ namespace Scellecs.Morpeh
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ForwardInvokeCallback()
         {
-            Callback?.Invoke(BatchedChanges);
+            Callback?.Invoke(batchedChanges);
         }
 
         [Conditional("MORPEH_DEBUG")]
@@ -100,7 +126,7 @@ namespace Scellecs.Morpeh
         {
             try
             {
-                Callback?.Invoke(BatchedChanges);
+                Callback?.Invoke(batchedChanges);
             }
             catch (Exception ex)
             {
