@@ -15,12 +15,15 @@ namespace Scellecs.Morpeh
         [Preserve]
         public void Initialize(World world)
         {
-            EventWorldExtensions.SetupEventRegistry(world);
+            world.CodeWriterEventsRegistry = new EventRegistry();
+
+            var eventSystemGroup = world.CreateSystemsGroup();
+            eventSystemGroup.AddSystem(new ProcessEventsSystem(world.CodeWriterEventsRegistry));
+            world.AddPluginSystemsGroup(eventSystemGroup);
         }
 
         public void Deinitialize(World world)
         {
-            EventWorldExtensions.CleanupEventRegistry(world);
         }
     }
 }
