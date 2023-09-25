@@ -39,7 +39,7 @@ namespace Tests
             Assert.IsTrue(evt.isScheduled);
             Assert.IsFalse(evt.isPublished);
             Assert.AreEqual(3, evt.scheduledChanges.length);
-            Assert.AreEqual(0, evt.batchedChanges.length);
+            Assert.AreEqual(0, evt.publishedChanges.length);
             Assert.AreEqual(1f, evt.scheduledChanges.data[0].value);
             Assert.AreEqual(2f, evt.scheduledChanges.data[1].value);
             Assert.AreEqual(3f, evt.scheduledChanges.data[2].value);
@@ -60,10 +60,10 @@ namespace Tests
             Assert.IsFalse(evt.isScheduled);
             Assert.IsTrue(evt.isPublished);
             Assert.AreEqual(0, evt.scheduledChanges.length);
-            Assert.AreEqual(3, evt.batchedChanges.length);
-            Assert.AreEqual(1f, evt.batchedChanges.data[0].value);
-            Assert.AreEqual(2f, evt.batchedChanges.data[1].value);
-            Assert.AreEqual(3f, evt.batchedChanges.data[2].value);
+            Assert.AreEqual(3, evt.publishedChanges.length);
+            Assert.AreEqual(1f, evt.publishedChanges.data[0].value);
+            Assert.AreEqual(2f, evt.publishedChanges.data[1].value);
+            Assert.AreEqual(3f, evt.publishedChanges.data[2].value);
         }
 
         [Test]
@@ -84,7 +84,7 @@ namespace Tests
             Assert.IsFalse(evt.isScheduled);
             Assert.IsFalse(evt.isPublished);
             Assert.AreEqual(0, evt.scheduledChanges.length);
-            Assert.AreEqual(0, evt.batchedChanges.length);
+            Assert.AreEqual(0, evt.publishedChanges.length);
         }
 
         [Test]
@@ -99,9 +99,9 @@ namespace Tests
                 ++calls;
 
                 Assert.AreEqual(3, changes.length);
-                Assert.AreEqual(1f, evt.batchedChanges.data[0].value);
-                Assert.AreEqual(2f, evt.batchedChanges.data[1].value);
-                Assert.AreEqual(3f, evt.batchedChanges.data[2].value);
+                Assert.AreEqual(1f, evt.publishedChanges.data[0].value);
+                Assert.AreEqual(2f, evt.publishedChanges.data[1].value);
+                Assert.AreEqual(3f, evt.publishedChanges.data[2].value);
             });
 
             evt.NextFrame(new TestEvent {value = 1f});
@@ -126,9 +126,9 @@ namespace Tests
                 ++calls;
 
                 Assert.AreEqual(3, changes.length);
-                Assert.AreEqual(1f, evt.batchedChanges.data[0].value);
-                Assert.AreEqual(2f, evt.batchedChanges.data[1].value);
-                Assert.AreEqual(3f, evt.batchedChanges.data[2].value);
+                Assert.AreEqual(1f, evt.publishedChanges.data[0].value);
+                Assert.AreEqual(2f, evt.publishedChanges.data[1].value);
+                Assert.AreEqual(3f, evt.publishedChanges.data[2].value);
             });
 
             evt.NextFrame(new TestEvent {value = 1f});
@@ -156,9 +156,9 @@ namespace Tests
                 ++calls;
 
                 Assert.AreEqual(3, changes.length);
-                Assert.AreEqual(1f, evt.batchedChanges.data[0].value);
-                Assert.AreEqual(2f, evt.batchedChanges.data[1].value);
-                Assert.AreEqual(3f, evt.batchedChanges.data[2].value);
+                Assert.AreEqual(1f, evt.publishedChanges.data[0].value);
+                Assert.AreEqual(2f, evt.publishedChanges.data[1].value);
+                Assert.AreEqual(3f, evt.publishedChanges.data[2].value);
             });
 
             evt.NextFrame(new TestEvent {value = 1f});

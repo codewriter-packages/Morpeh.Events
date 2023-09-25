@@ -16,7 +16,7 @@ namespace Scellecs.Morpeh
     [Il2CppSetOption(Option.DivideByZeroChecks, false)]
     public class Event<TData> : EventBase where TData : struct, IEventData
     {
-        public readonly FastList<TData> batchedChanges = new FastList<TData>();
+        public readonly FastList<TData> publishedChanges = new FastList<TData>();
         public readonly FastList<TData> scheduledChanges = new FastList<TData>();
 
         public bool isPublished;
@@ -24,10 +24,10 @@ namespace Scellecs.Morpeh
 
 #if !MORPEH_STRICT_MODE
 #if MORPEH_LEGACY
-        [Obsolete("[MORPEH] Use batchedChanges instead.")]
+        [Obsolete("[MORPEH] Use publishedChanges instead.")]
 #endif
         [PublicAPI]
-        public FastList<TData> BatchedChanges => batchedChanges;
+        public FastList<TData> BatchedChanges => publishedChanges;
 
 #if MORPEH_LEGACY
         [Obsolete("[MORPEH] Use scheduledChanges instead.")]
@@ -99,14 +99,14 @@ namespace Scellecs.Morpeh
                 }
 
                 isPublished = false;
-                batchedChanges.Clear();
+                publishedChanges.Clear();
             }
 
             if (isScheduled)
             {
                 isPublished = true;
                 isScheduled = false;
-                batchedChanges.AddListRange(scheduledChanges);
+                publishedChanges.AddListRange(scheduledChanges);
                 scheduledChanges.Clear();
 
                 registry.DispatchedEvents.Add(this);
@@ -117,7 +117,7 @@ namespace Scellecs.Morpeh
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ForwardInvokeCallback()
         {
-            Callback?.Invoke(batchedChanges);
+            Callback?.Invoke(publishedChanges);
         }
 
         [Conditional("MORPEH_DEBUG")]
@@ -126,7 +126,7 @@ namespace Scellecs.Morpeh
         {
             try
             {
-                Callback?.Invoke(batchedChanges);
+                Callback?.Invoke(publishedChanges);
             }
             catch (Exception ex)
             {
