@@ -16,6 +16,7 @@ namespace Scellecs.Morpeh
         public void Initialize(World world)
         {
             world.CodeWriterEventsRegistry = new EventRegistry();
+            world.CodeWriterRequestsRegistry = new RequestRegistry();
 
             var eventSystemGroup = world.CreateSystemsGroup();
             eventSystemGroup.AddSystem(new ProcessEventsSystem(world.CodeWriterEventsRegistry));
