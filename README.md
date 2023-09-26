@@ -8,40 +8,50 @@ using System;
 using Scellecs.Morpeh;
 using Scellecs.Morpeh.Systems;
 
-[Serializable]
-public struct DamageRequest : IEventData {
+public struct DamageRequest : IRequestData {
     public EntityId targetEntityId;
 }
 
-[Serializable]
 public struct DamagedEvent : IEventData {
     public EntityId targetEntityId;
 }
 
 public class DamageSystem : UpdateSystem {
-    private Event<DamageRequest> damageRequest;
+    private Request<DamageRequest> damageRequest;
     private Event<DamagedEvent> damagedEvent;
 
     public override void OnAwake() {
-        damageRequest = World.GetEvent<DamageRequest>();
+        damageRequest = World.GetRequest<DamageRequest>();
         damagedEvent = World.GetEvent<DamagedEvent>();
     }
 
     public override void OnUpdate(float deltaTime) {
-        if (!damageRequest.IsPublished) {
-            return;
-        }
-
-        foreach (var evt in damageRequest.BatchedChanges) {
-            ApplyDamage(evt.targetEntityId);
+        foreach (var request in damageRequest.Consume()) {
+            ApplyDamage(request.targetEntityId);
 
             damagedEvent.NextFrame(new DamagedEvent {
-                targetEntityId = evt.targetEntityId,
+                targetEntityId = request.targetEntityId,
             });
         }
     }
 
     private void ApplyDamage(EntityId target) { }
+}
+
+public class PlaySoundOnDamageSystem : UpdateSystem {
+    private Event<DamagedEvent> damagedEvent;
+
+    public override void OnAwake() {
+        damagedEvent = World.GetEvent<DamagedEvent>();
+    }
+
+    public override void OnUpdate(float deltaTime) {
+        foreach (var evt in damagedEvent.publishedChanges) {
+            PlaySound(evt.targetEntityId);
+        }
+    }
+
+    private void PlaySound(EntityId target) { }
 }
 ```
 
