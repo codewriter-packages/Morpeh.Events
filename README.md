@@ -1,5 +1,5 @@
 # Morpeh.Events [![Github license](https://img.shields.io/github/license/codewriter-packages/Morpeh.Events.svg?style=flat-square)](#) [![Unity 2020.1](https://img.shields.io/badge/Unity-2020.3+-2296F3.svg?style=flat-square)](#) ![GitHub package.json version](https://img.shields.io/github/package-json/v/codewriter-packages/Morpeh.Events?style=flat-square)
-_Events for Morpeh ECS_
+_Lightweight events and requests for [Morpeh](https://github.com/scellecs/morpeh)_
 
 ## :receipt: Core Concepts
 
