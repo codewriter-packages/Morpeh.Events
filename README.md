@@ -35,6 +35,13 @@ damageEvent.NextFrame(new DamageEvent { ... });
 
 // handle event
 foreach (var evt in damagedEvent.publishedChanges) { ... }
+
+// subscribe to event
+var subscription = damagedEvent.Subscribe(changes => { ... });
+
+// do not forget to unsubscribe from event 
+subscription.Dispose();
+
 ```
 
 ## :thought_balloon: How to use?
