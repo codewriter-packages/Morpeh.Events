@@ -34,31 +34,21 @@ namespace Tests
         public void Consume()
         {
             var request = _world.GetRequest<TestRequest>();
+            var consumed = new List<float>();
 
             request.Publish(new TestRequest {value = 1f});
             request.Publish(new TestRequest {value = 2f});
             request.Publish(new TestRequest {value = 3f});
-
-            var consumed = new List<float>();
 
             foreach (var it in request.Consume())
             {
                 consumed.Add(it.value);
             }
 
-            Assert.That(consumed, Is.EquivalentTo(new List<float> {1f, 2f, 3f}));
-        }
+            request.lastConsumeFrame = -1; // hack to disable frame error
 
-        [Test]
-        public void ConsumePartial()
-        {
-            var request = _world.GetRequest<TestRequest>();
-
-            request.Publish(new TestRequest {value = 1f});
-            request.Publish(new TestRequest {value = 2f});
-            request.Publish(new TestRequest {value = 3f});
-
-            var consumed = new List<float>();
+            request.Publish(new TestRequest {value = 4f});
+            request.Publish(new TestRequest {value = 5f});
 
             foreach (var it in request.Consume())
             {
@@ -66,12 +56,21 @@ namespace Tests
                 break;
             }
 
+            request.lastConsumeFrame = -1; // hack to disable frame error
+
+            request.Publish(new TestRequest {value = 6f});
+
             foreach (var it in request.Consume())
             {
                 consumed.Add(it.value);
             }
 
-            Assert.That(consumed, Is.EquivalentTo(new List<float> {1f, 2f, 3f}));
+            request.lastConsumeFrame = -1; // hack to disable frame error
+
+            request.Publish(new TestRequest {value = 70f});
+            request.Publish(new TestRequest {value = 80f});
+
+            Assert.That(consumed, Is.EquivalentTo(new List<float> {1f, 2f, 3f, 4f, 5f, 6f}));
         }
 
         [Test]
@@ -99,6 +98,24 @@ namespace Tests
         }
 
         [Test]
+        public void InternalMemoryCleanup()
+        {
+            var request = _world.GetRequest<TestRequest>();
+
+            request.Publish(new TestRequest {value = 1f});
+            request.Publish(new TestRequest {value = 2f});
+            request.Publish(new TestRequest {value = 3f});
+
+            foreach (var it in request.Consume())
+            {
+            }
+
+            Assert.That(request.changes.data, Is.All.EqualTo(default(TestRequest)));
+            Assert.AreEqual(0, request.changes.length);
+            Assert.AreEqual(0, request.lastConsumedIndex);
+        }
+
+        [Test]
         public void Consume_Publish_ErrorLog()
         {
             var request = _world.GetRequest<TestRequest>();
@@ -108,7 +125,7 @@ namespace Tests
             request.Publish(new TestRequest {value = 1f});
 
             LogAssert.Expect(LogType.Error,
-                "[MORPEH] The request was already consumed in the current frame. Reorder systems or set allowNextFrame parameter");
+                "[MORPEH] Request<TestRequest> was already consumed in the current frame. Reorder systems or set allowNextFrame parameter");
         }
 
         [Test]

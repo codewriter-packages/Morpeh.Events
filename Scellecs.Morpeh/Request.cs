@@ -2,7 +2,6 @@
 #define MORPEH_DEBUG
 #endif
 
-using System;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using Scellecs.Morpeh.Collections;
@@ -30,7 +29,7 @@ namespace Scellecs.Morpeh
             if (!allowNextFrame && lastConsumeFrame == Time.frameCount)
             {
                 MLogger.LogError(
-                    "The request was already consumed in the current frame. " +
+                    $"Request<{typeof(TData).Name}> was already consumed in the current frame. " +
                     "Reorder systems or set allowNextFrame parameter");
             }
 #endif
@@ -45,37 +44,11 @@ namespace Scellecs.Morpeh
             lastConsumeFrame = Time.frameCount;
 #endif
 
-            if (lastConsumedIndex > 0)
-            {
-                Cleanup();
-            }
-
             Consumer consumer;
             consumer.request = this;
             return consumer;
         }
-
-        internal void Cleanup()
-        {
-            if (lastConsumedIndex >= changes.length)
-            {
-                changes.Clear();
-                lastConsumedIndex = 0;
-                return;
-            }
-
-            Array.Copy(changes.data, lastConsumedIndex, changes.data, 0, changes.length - lastConsumedIndex);
-
-            changes.length -= lastConsumedIndex;
-            changes.lastSwappedIndex = -1;
-
-            for (var i = 0; i < lastConsumedIndex; i++)
-            {
-                changes.data[i + changes.length] = default;
-            }
-
-            lastConsumedIndex = 0;
-        }
+        
 
         public struct Consumer
         {
@@ -99,6 +72,8 @@ namespace Scellecs.Morpeh
             {
                 if (request.lastConsumedIndex >= request.changes.length)
                 {
+                    request.changes.Clear();
+                    request.lastConsumedIndex = 0;
                     return false;
                 }
 
