@@ -38,6 +38,13 @@ namespace Scellecs.Morpeh
         }
 
         [PublicAPI]
+        public void Clear()
+        {
+            changes.Clear();
+            lastConsumedIndex = 0;
+        }
+
+        [PublicAPI]
         public Consumer Consume()
         {
 #if MORPEH_DEBUG
@@ -72,8 +79,7 @@ namespace Scellecs.Morpeh
             {
                 if (request.lastConsumedIndex >= request.changes.length)
                 {
-                    request.changes.Clear();
-                    request.lastConsumedIndex = 0;
+                    request.Clear();
                     return false;
                 }
 

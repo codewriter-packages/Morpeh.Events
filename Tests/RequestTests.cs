@@ -31,6 +31,46 @@ namespace Tests
         }
 
         [Test]
+        public void Clear()
+        {
+            var request = _world.GetRequest<TestRequest>();
+            var consumed = new List<float>();
+
+            request.Publish(new TestRequest {value = 1f});
+            request.Publish(new TestRequest {value = 2f});
+            request.Publish(new TestRequest {value = 3f});
+
+            request.Clear();
+
+            foreach (var it in request.Consume())
+            {
+                consumed.Add(it.value);
+            }
+
+            Assert.That(consumed, Is.EquivalentTo(new List<float>()));
+        }
+
+        [Test]
+        public void ClearOnConsume()
+        {
+            var request = _world.GetRequest<TestRequest>();
+            var consumed = new List<float>();
+
+            request.Publish(new TestRequest {value = 1f});
+            request.Publish(new TestRequest {value = 2f});
+            request.Publish(new TestRequest {value = 3f});
+
+            foreach (var it in request.Consume())
+            {
+                consumed.Add(it.value);
+
+                request.Clear();
+            }
+
+            Assert.That(consumed, Is.EquivalentTo(new List<float> {1f}));
+        }
+
+        [Test]
         public void Consume()
         {
             var request = _world.GetRequest<TestRequest>();
