@@ -106,7 +106,7 @@ namespace Scellecs.Morpeh
             {
                 isPublished = true;
                 isScheduled = false;
-                publishedChanges.AddListRange(scheduledChanges);
+				FastListExtensions.AddRange(publishedChanges, scheduledChanges);
                 scheduledChanges.Clear();
 
                 registry.DispatchedEvents.Add(this);

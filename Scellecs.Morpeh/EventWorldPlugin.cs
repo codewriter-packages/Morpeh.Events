@@ -9,7 +9,7 @@ namespace Scellecs.Morpeh
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void RuntimeInitialize()
         {
-            WorldExtensions.AddWorldPlugin(new EventWorldPlugin());
+            WorldPluginsExtensions.AddWorldPlugin(new EventWorldPlugin());
         }
 
         [Preserve]
